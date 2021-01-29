@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 
 
 class Ui_MainWindow(object):
@@ -40,6 +41,8 @@ class Ui_MainWindow(object):
         self.File_location.setObjectName("File_location")
         self.Browse_Files = QtWidgets.QPushButton(self.centralwidget)
         self.Browse_Files.setGeometry(QtCore.QRect(780, 90, 91, 21))
+        self.Browse_Files.clicked.connect(self.browse_file)
+
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(False)
@@ -48,7 +51,7 @@ class Ui_MainWindow(object):
         self.Browse_Files.setObjectName("Browse_Files")
         self.Start_Download = QtWidgets.QPushButton(self.centralwidget)
         self.Start_Download.setGeometry(QtCore.QRect(340, 120, 201, 28))
-        self.Start_Download.clicked.connect(self.start_download)
+        self.Start_Download.clicked.connect( self.start_download )
 
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -102,6 +105,8 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        # return([file_link,file_location])
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -109,7 +114,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Enter the URL of file you want to download ->"))
         self.File_link.setText(_translate("MainWindow", "Please enter the Link"))
         self.label_2.setText(_translate("MainWindow", "Enter the location of your file to be saved ->"))
-        self.File_location.setText(_translate("MainWindow", "Please enter the Location You want to save"))
+        self.File_location.setText(_translate("MainWindow", "Enter Location You want to save "))
         self.Browse_Files.setText(_translate("MainWindow", "Browse"))
         self.Start_Download.setText(_translate("MainWindow", "Start The Download "))
         self.pushButton.setText(_translate("MainWindow", "Pause All"))
@@ -119,7 +124,15 @@ class Ui_MainWindow(object):
     def start_download(self):
         file_link = self.File_link.text()
         file_location = self.File_location.text()
-        return(file_link,file_location)
+        import downloading as dow
+        dow.download(file_link,file_location)
+
+    def browse_file(self):
+        self.open_dialog_box()
+    def open_dialog_box(self):
+        file_location = QFileDialog.getSaveFileName()
+        self.File_location.setText(file_location[0])
+
 
 
 if __name__ == "__main__":
