@@ -80,6 +80,13 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 952, 364))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.downloadscrollarea.setWidget(self.scrollAreaWidgetContents_2)
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_2)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        for i in range(1,100):
+            self.lab = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
+            self.lab.setObjectName("lab")
+            self.gridLayout_3.addWidget(self.lab,i,0,1,6)
+            self.lab.setText('')
         self.gridLayout_2.addWidget(self.downloadscrollarea, 5, 0, 1, 3)
         self.Heading = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         font = QtGui.QFont()
