@@ -1,15 +1,14 @@
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5 import  QtGui, QtWidgets
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import requests
 import time
+import threading
 t = -1
-class  download_requests():
+class  download_requests(QObject):
     def do_download(self,ui,File_link,File_location):
         global t
-        t = t+ 1
-
+        t = t + 1
         def canceldownload():
             print("Hi cancel1")
         def pausedownload():
@@ -20,7 +19,7 @@ class  download_requests():
         file_location = File_location.text()
         File_location.setText('')
         File_link.setText('')
-        print(file_location,file_link,t)
+        # print(file_location,file_link,t)
         ui.out_file_location = QtWidgets.QLabel(ui.scrollAreaWidgetContents_2)
         ui.out_file_location.setObjectName("out_file_location")
         font = QtGui.QFont()
@@ -94,60 +93,60 @@ class  download_requests():
         ui.DownloadSpeed1.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         ui.timeremaning1.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         ui.out_file_location.setText(str(t+1)+" . FILE LOCATION->{}".format(file_location))
-        # ui.downloaded1.setText("DOWNLOADED->")
-        # ui.TimeTaken1.setText("time atken")
-        # ui.DownloadSpeed1.setText('downlaoda seep')
-        # ui.timeremaning1.setText('time remain')
-        with open(file_location, 'wb') as f:
-            response = requests.get(file_link, allow_redirects=True, stream=True)
-            total_length = response.headers.get("content-length")
-            start = time.time()
-            if total_length is None:
-                f.write(response.content)
-                ui.progressBar1.setValue(100)
-                ui.downloaded1.setText("DOWNLOADED-> 1/1")
-            else:
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=1024):
-                    # if canceler:
-                    #     os.remove(file_location)
-                    # else:
-                    dl += len(data)
-                    if data:
-                        f.write(data)
-                        f.flush()
-                    done = int(100 * dl / total_length)
-                    ui.downloaded1.setText("DOWNLOADED->{}MB/{}MB".format(str(dl / (1024 * 1024))[:8],
-                                                                            str(total_length / (1024 * 1024))[:8]))
-                    # time.sleep(0.1)
-                    if time.time() != start:
-                        speed = (dl // (time.time() - start))
-                        try:
-                            remain = (total_length - dl) / (speed)
-                            if remain > 60:
-                                remain_min = remain // 60
-                                remain_sec = remain - (remain_min * 60)
-                                ui.timeremaning1.setText(
-                                    "TIME REMAIN->{}min{}sec".format(str(remain_min), str(remain_sec)[:2]))
-                            else:
-                                ui.timeremaning1.setText("TIME REMAIN->{}sec".format(remain[:2]))
 
-                        except:
-                            ui.timeremaning1.setText("TIME REMAIN->{}".format('9999999999'))
-                        if speed > (1024 * 1024):
-                            ui.DownloadSpeed1.setText('DOWNLOAD SPEED->{}MBps'.format(str(speed / (1024 * 1024))[:6]))
+        try:
+            with open(file_location, 'wb') as f:
+                response = requests.get(file_link, allow_redirects=True, stream=True)
+                total_length = response.headers.get("content-length")
+                start = time.time()
+                if total_length is None:
+                    f.write(response.content)
+                    ui.progressBar1.setValue(100)
+                    ui.downloaded1.setText("DOWNLOADED-> 1/1")
+                else:
+                    dl = 0
+                    total_length = int(total_length)
+                    for data in response.iter_content(chunk_size=2048):
+                        # if canceler:
+                        #     os.remove(file_location)
+                        # else:
+                        dl += len(data)
+                        if data:
+                            f.write(data)
+                            f.flush()
+                        done = int(100 * dl / total_length)
+                        ui.downloaded1.setText("DOWNLOADED->{}MB/{}MB".format(str(dl / (1024 * 1024))[:8],
+                                                                              str(total_length / (1024 * 1024))[:8]))
+                        # time.sleep(0.1)
+                        if time.time() != start:
+                            speed = (dl // (time.time() - start))
+                            try:
+                                remain = (total_length - dl) / (speed)
+                                if remain > 60:
+                                    remain_min = remain // 60
+                                    remain_sec = remain - (remain_min * 60)
+                                    ui.timeremaning1.setText(
+                                        "TIME REMAIN->{}min{}sec".format(str(remain_min), str(remain_sec)[:2]))
+                                else:
+                                    ui.timeremaning1.setText("TIME REMAIN->{}sec".format(str(remain)[:2]))
+
+                            except:
+                                ui.timeremaning1.setText("TIME REMAIN->{}".format('9999999999'))
+                            if speed > (1024 * 1024):
+                                ui.DownloadSpeed1.setText('DOWNLOAD SPEED->{}MBps'.format(str(speed / (1024 * 1024))[:6]))
+                            else:
+                                ui.DownloadSpeed1.setText("DOWNLOAD SPEED->{}KBps".format(str(speed / 1024)[:5]))
+                        temp = time.time() - start
+                        if (temp) > 60:
+                            ui.TimeTaken1.setText(
+                                "TIME TAKEN->{}min{}sec".format(str(temp // 60), str(temp - (temp // 60)*60)[:2]))
                         else:
-                            ui.DownloadSpeed1.setText("DOWNLOAD SPEED->{}KBps".format(str(speed / 1024)[:5]))
-                    temp = time.time() - start
-                    if (temp) > 60:
-                        ui.TimeTaken1.setText(
-                            "TIME TAKEN->{}min{}sec".format(str(temp // 60), str(temp - temp // 60)[:2]))
-                    else:
-                        ui.TimeTaken1.setText('TIME TAKEN->{}sec'.format(str(temp)[:2]))
-                    ui.progressBar1.setValue(done)
-                    QApplication.processEvents()
-                ui.progressBar1.setValue(100)
-                ui.downloaded1.setText("DOWNLOADED->{}/{}".format(str(total_length), str(total_length)))
-        QApplication.processEvents()
+                            ui.TimeTaken1.setText('TIME TAKEN->{}sec'.format(str(temp)[:2]))
+                        ui.progressBar1.setValue(done)
+                        QApplication.processEvents()
+                    ui.progressBar1.setValue(100)
+                    ui.downloaded1.setText(f"DOWNLOADED->{str(total_length/(1024*1024))}MB/{str(total_length/(1024*1024))}MB")
+            QApplication.processEvents()
+        except:
+            print("F")
 

@@ -1,13 +1,14 @@
 from Main_window import Ui_MainWindow
-from downloading import download_requests
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
-import requests
-import time
-count = -1
-dicti={}
+from PyQt5.QtCore import *
+from downloading import download_requests
+import concurrent.futures
+import threading
+count = 0
+# import time
+# start = time.time()
 class downloader_class(Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -16,22 +17,30 @@ class downloader_class(Ui_MainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
 
+        self.thread = {}
+        self.obj = {}
         self.ui.Browse.clicked.connect(self.browse_file)
         self.ui.Start_download.clicked.connect(self.start_download)
         self.ui.cancelall.clicked.connect(self.cancelalldownload)
         self.ui.pauseall.clicked.connect(self.pausealldownload)
         self.ui.resumeall.clicked.connect(self.resumealldownlaod)
+
         self.MainWindow.show()
         sys.exit(self.app.exec_())
+
     def start_download(self):
         global count
-        count = count + 1
-        global dicti
-        dicti[str(count)] = 0
-        dicti[str(count)] = download_requests()
-        dicti[str(count)].do_download(self.ui,self.ui.File_link,self.ui.File_location)
-        # QApplication.processEvents()
+        count+=1
 
+        # self.obj[count] = download_requests()
+        #
+        # threading.Thread(target = self.obj[count].do_download,args = [self.ui,self.ui.File_link,self.ui.File_location]).start()
+        self.thread = QThread()
+        # Step 3: Create a worker object
+        self.worker = download_requests()
+        self.worker.moveToThread(self.thread)
+        self.worker.do_download(self.ui,self.ui.File_link,self.ui.File_location)
+        self.thread.start()
     def cancelalldownload(self):
         print("Hello Cancel")
     def pausealldownload(self):
